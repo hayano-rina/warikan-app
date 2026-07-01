@@ -1,13 +1,75 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
-generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-}
-
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// グループ（飲み会、旅行など）
+model Group {
+  id        String     @id @default(uuid())
+  name      String
+  createdAt DateTime   @default(now())
+
+  // リレーション
+  categories Category[]
+  members    Member[]
+  payments   Payment[]
+}
+
+// カテゴリ（傾斜・倍率）
+model Category {
+  id        String   @id @default(uuid())
+  groupId   String
+  name      String   // 例: "1年生", "飲酒"
+  weight    Float    // 倍率: 1.2 や 0.8 など
+  createdAt DateTime @default(now())
+
+  // リレーション
+  group   Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  members Member[]
+}
+
+// メンバー
+model Member {
+  id         String   @id @default(uuid())
+  groupId    String
+  categoryId String
+  name       String
+  createdAt  DateTime @default(now())
+
+  // リレーション
+  group             Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  category          Category             @relation(fields: [categoryId], references: [id])
+  paidPayments      Payment[]            @relation("Payer")
+  participatedSplits PaymentParticipant[] // 自分が参加した支払い
+}
+
+// 支払い
+model Payment {
+  id          String   @id @default(uuid())
+  groupId     String
+  payerId     String   // 誰が払ったか
+  amount      Int      // 金額
+  description String   // 内容
+  createdAt   DateTime @default(now())
+
+  // リレーション
+  group        Group                @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payer        Member               @relation("Payer", fields: [payerId], references: [id])
+  participants PaymentParticipant[] // 誰の分を払ったか（支払いに参加した人たち）
+}
+
+// 支払いに参加した人たち（中間テーブル）
+model PaymentParticipant {
+  paymentId String
+  memberId  String
+
+  // リレーション
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  member  Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@id([paymentId, memberId]) // 複合主キー
 }
