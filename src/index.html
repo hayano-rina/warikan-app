@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>割り勘アプリ - 複数グループ対応版</title>
+    <title>割り勘アプリ - プルダウン選択版</title>
     <style>
       body {
         font-family: sans-serif;
@@ -84,56 +84,28 @@
         font-size: 0.9em;
       }
       .info {
-        background: #fff3cd;
-        padding: 12px;
+        background: #e8f4fd;
+        padding: 15px;
         border-radius: 4px;
         font-size: 0.9em;
         margin-bottom: 15px;
-        border-left: 5px solid #ffc107;
-      }
-      .settlement-list {
-        list-style: none;
-        padding: 0;
-      }
-      .settlement-item {
-        background: #e8f5e9;
-        border-left: 5px solid #2e7d32;
-        padding: 10px;
-        margin-bottom: 8px;
-        border-radius: 4px;
-        font-weight: bold;
-      }
-      .app-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+        border-left: 5px solid #007bff;
       }
     </style>
   </head>
   <body>
-    <div class="app-header">
-      <h1>割り勘アプリ 🛠️ (複数グループ対応)</h1>
-    </div>
+    <h1>割り勘アプリ 📱 (グループ選択機能付き)</h1>
 
     <div class="info">
-      <label style="color: #856404">📁 操作するグループを切り替える</label>
-      <div style="display: flex; gap: 10px; margin-top: 5px">
-        <input
-          type="text"
-          id="targetGroupIdInput"
-          placeholder="過去に作ったグループIDを入力（貼り付け）してください"
-        />
-        <button id="loadGroupBtn" style="width: auto; background: #6c757d">
-          読み込む
-        </button>
-      </div>
-      <div style="margin-top: 10px; font-weight: bold">
-        選択中のグループ名:
-        <span id="currentGroupName" style="color: #dc3545; font-size: 1.1em"
-          >未選択</span
-        >
-      </div>
+      <label style="color: #0056b3; font-size: 1em"
+        >📁 操作するグループを選択</label
+      >
+      <select
+        id="groupSelect"
+        style="margin-top: 5px; width: 100%; font-size: 1.05em; padding: 10px"
+      >
+        <option value="">-- グループを読み込み中... --</option>
+      </select>
     </div>
 
     <div class="card">
@@ -142,7 +114,7 @@
         <input
           type="text"
           id="groupNameInput"
-          placeholder="例: 東京旅行、金曜飲み会"
+          placeholder="例: スキー旅行、女子会"
         />
       </div>
       <button id="createGroupBtn">グループ作成</button>
@@ -227,8 +199,7 @@
       let activeGroupId = "";
 
       const responseOutput = document.getElementById("responseOutput");
-      const targetGroupIdInput = document.getElementById("targetGroupIdInput");
-      const currentGroupName = document.getElementById("currentGroupName");
+      const groupSelect = document.getElementById("groupSelect");
       const categorySelect = document.getElementById("categorySelect");
       const payerSelect = document.getElementById("payerSelect");
       const participantsGroup = document.getElementById("participantsGroup");
@@ -240,22 +211,47 @@
         responseOutput.textContent = JSON.stringify(data, null, 2);
       };
 
-      // ★最重要：グループの情報をサーバーから取得して画面を「そのグループ専用」に書き換える関数
-      async function fetchAndRefreshGroupDetails(groupId) {
-        if (!groupId) return;
+      // 🌟 新機能：DBにあるグループ一覧をすべて取得してプルダウンを構築する
+      async function loadGroupList(selectedId = null) {
         try {
-          // API: GET /api/groups/:id (グループ詳細取得)
+          const res = await fetch(`${API_BASE_URL}/groups`);
+          const groups = await res.json();
+
+          groupSelect.innerHTML =
+            '<option value="">-- グループを選択してください --</option>';
+          groups.forEach((g) => {
+            const opt = document.createElement("option");
+            opt.value = g.id;
+            opt.textContent = g.name;
+            if (g.id === selectedId) opt.selected = true;
+            groupSelect.appendChild(opt);
+          });
+
+          if (selectedId) {
+            await fetchAndRefreshGroupDetails(selectedId);
+          }
+        } catch (e) {
+          groupSelect.innerHTML =
+            '<option value="">エラー: グループを読み込めませんでした</option>';
+        }
+      }
+
+      // 選択されたグループの詳細データを読み込む
+      async function fetchAndRefreshGroupDetails(groupId) {
+        if (!groupId) {
+          clearFormFields();
+          return;
+        }
+        try {
           const res = await fetch(`${API_BASE_URL}/groups/${groupId}`);
           if (!res.ok) throw new Error("グループが見つかりません");
           const group = await res.json();
           showResult(group);
 
           activeGroupId = group.id;
-          targetGroupIdInput.value = group.id;
-          currentGroupName.textContent = `${group.name} (ID: ${group.id})`;
-          settlementResultArea.innerHTML = ""; // 前の清算結果をクリア
+          settlementResultArea.innerHTML = "";
 
-          // 1. カテゴリドロップダウンをリフレッシュ
+          // 1. カテゴリドロップダウン
           categorySelect.innerHTML =
             group.categories.length === 0
               ? '<option value="">-- 先にカテゴリを登録 --</option>'
@@ -267,7 +263,7 @@
             categorySelect.appendChild(opt);
           });
 
-          // 2. 支払った人のドロップダウンをリフレッシュ
+          // 2. 支払った人ドロップダウン
           payerSelect.innerHTML =
             group.members.length === 0
               ? '<option value="">-- 先にメンバーを追加 --</option>'
@@ -279,7 +275,7 @@
             payerSelect.appendChild(opt);
           });
 
-          // 3. 割り勘対象チェックボックスをリフレッシュ
+          // 3. チェックボックス
           participantsGroup.innerHTML =
             group.members.length === 0
               ? "（メンバーを追加するとここに並びます）"
@@ -292,15 +288,22 @@
           });
         } catch (e) {
           alert(e.message);
-          currentGroupName.textContent = "未選択 (エラー)";
         }
       }
 
-      // 手動読み込みボタン
-      document.getElementById("loadGroupBtn").addEventListener("click", () => {
-        const id = targetGroupIdInput.value.trim();
-        if (!id) return alert("IDを入力してください");
-        fetchAndRefreshGroupDetails(id);
+      function clearFormFields() {
+        activeGroupId = "";
+        categorySelect.innerHTML =
+          '<option value="">-- 先にカテゴリを登録 --</option>';
+        payerSelect.innerHTML =
+          '<option value="">-- 先にメンバーを追加 --</option>';
+        participantsGroup.innerHTML = "（メンバーを追加するとここに並びます）";
+        settlementResultArea.innerHTML = "";
+      }
+
+      // プルダウンが切り替わった時のイベント
+      groupSelect.addEventListener("change", (e) => {
+        fetchAndRefreshGroupDetails(e.target.value);
       });
 
       // 1. グループ作成
@@ -318,8 +321,8 @@
             const data = await res.json();
             if (res.ok) {
               document.getElementById("groupNameInput").value = "";
-              // 作成したらそのままそのグループを読み込む
-              await fetchAndRefreshGroupDetails(data.id);
+              // リロードして、今作ったグループを選択状態にする
+              await loadGroupList(data.id);
             } else {
               showResult(data);
             }
@@ -332,8 +335,7 @@
       document
         .getElementById("createCategoryBtn")
         .addEventListener("click", async () => {
-          if (!activeGroupId)
-            return alert("グループを選択または作成してください");
+          if (!activeGroupId) return alert("グループを選択してください");
           const name = document
             .getElementById("categoryNameInput")
             .value.trim();
@@ -350,7 +352,7 @@
             );
             if (res.ok) {
               document.getElementById("categoryNameInput").value = "";
-              await fetchAndRefreshGroupDetails(activeGroupId); // 最新状態にリフレッシュ
+              await fetchAndRefreshGroupDetails(activeGroupId);
             } else {
               showResult(await res.json());
             }
@@ -363,8 +365,7 @@
       document
         .getElementById("createMemberBtn")
         .addEventListener("click", async () => {
-          if (!activeGroupId)
-            return alert("グループを選択または作成してください");
+          if (!activeGroupId) return alert("グループを選択してください");
           const name = document.getElementById("memberNameInput").value.trim();
           const categoryId = categorySelect.value;
           if (!name || !categoryId) return alert("入力漏れがあります");
@@ -379,7 +380,7 @@
             );
             if (res.ok) {
               document.getElementById("memberNameInput").value = "";
-              await fetchAndRefreshGroupDetails(activeGroupId); // 最新状態にリフレッシュ
+              await fetchAndRefreshGroupDetails(activeGroupId);
             } else {
               showResult(await res.json());
             }
@@ -463,6 +464,9 @@
             settlementResultArea.innerHTML = "エラーが発生しました";
           }
         });
+
+      // ページを開いた瞬間に一回だけグループ一覧を読み込む
+      loadGroupList();
     </script>
   </body>
 </html>
