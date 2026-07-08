@@ -5,66 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>割り勘アプリ</title>
     <style>
+      /* 全体の基本設定 */
       body {
-        font-family: sans-serif;
-        padding: 20px;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Sans-Serif;
+        padding: 15px;
         max-width: 750px;
         margin: 0 auto;
-        background: #f8f9fa;
+        background: #f4f6f8;
         color: #333;
+        line-height: 1.5;
       }
+      h1 {
+        font-size: 1.8em;
+        text-align: center;
+        margin-bottom: 20px;
+        color: #222;
+      }
+      h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 1.2em;
+        color: #444;
+        border-left: 4px solid #007bff;
+        padding-left: 10px;
+      }
+
+      /* カードのデザイン */
       .card {
-        border: 1px solid #dee2e6;
+        border: 1px solid #e1e4e6;
         padding: 20px;
-        border-radius: 8px;
+        border-radius: 12px;
         margin-bottom: 20px;
         background: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
       }
       .form-group {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
       }
       label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 6px;
         font-weight: bold;
-        font-size: 0.9em;
+        font-size: 0.85em;
+        color: #555;
       }
+
+      /* 入力フォーム（スマホでタップしやすいように高さを確保） */
       input,
       select {
-        padding: 8px;
-        width: 95%;
+        padding: 10px;
+        width: 100%;
+        box-sizing: border-box; /* はみ出し防止 */
         border: 1px solid #ced4da;
-        border-radius: 4px;
+        border-radius: 6px;
+        font-size: 16px; /* 🌟 iPhoneでズームされるのを防ぐサイズ */
+        background-color: #fff;
       }
+
+      /* チェックボックスのグループ */
       .checkbox-group {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
         max-height: 150px;
         overflow-y: auto;
         border: 1px solid #ced4da;
-        padding: 10px;
-        border-radius: 4px;
+        padding: 12px;
+        border-radius: 6px;
+        background: #fdfdfd;
       }
       .checkbox-label {
         font-weight: normal;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.95em;
       }
       .checkbox-label input {
         width: auto;
+        height: 18px;
+        width: 18px;
       }
+
+      /* ボタンのデザイン */
       button {
-        padding: 10px 20px;
+        padding: 12px 20px;
         cursor: pointer;
         background: #007bff;
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         font-weight: bold;
+        font-size: 1em;
         width: 100%;
+        transition: background 0.2s;
       }
       button:hover {
         background: #0056b3;
@@ -75,16 +111,29 @@
       #settleBtn:hover {
         background: #218838;
       }
+
+      /* ログの黒枠 */
+      pre {
+        background: #212529;
+        color: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-size: 0.85em;
+      }
+
+      /* グループ選択エリア */
       .info {
         background: #e8f4fd;
         padding: 15px;
-        border-radius: 4px;
-        font-size: 0.9em;
-        margin-bottom: 15px;
+        border-radius: 12px;
+        font-size: 0.95em;
+        margin-bottom: 20px;
         border-left: 5px solid #007bff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
       }
 
-      /* 🌟 リスト表示用の新しいスタイル */
+      /* 🌟 PC用の並び替えスタイル（基本はこれ） */
       .flex-container {
         display: flex;
         gap: 20px;
@@ -93,9 +142,10 @@
       .flex-child {
         flex: 1;
         background: #fff;
-        border: 1px solid #dee2e6;
+        border: 1px solid #e1e4e6;
         padding: 15px;
-        border-radius: 8px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
       }
       .data-list {
         list-style: none;
@@ -103,7 +153,7 @@
         margin: 0;
       }
       .data-list li {
-        padding: 8px;
+        padding: 10px 8px;
         border-bottom: 1px solid #eee;
         font-size: 0.9em;
       }
@@ -126,10 +176,32 @@
       .settlement-item {
         background: #e8f5e9;
         border-left: 5px solid #2e7d32;
-        padding: 10px;
+        padding: 12px;
         margin-bottom: 8px;
-        border-radius: 4px;
+        border-radius: 6px;
         font-weight: bold;
+      }
+
+      /* 📱 【超重要】スマートフォン（画面幅768px以下）用の設定 */
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        h1 {
+          font-size: 1.5em;
+        }
+
+        /* 2カラムだったメンバー・履歴リストを「縦並び」に強制変換 */
+        .flex-container {
+          flex-direction: column;
+          gap: 15px;
+        }
+
+        /* 入力欄の左右パディングを少し狭めて画面を広く使う */
+        .card {
+          padding: 15px;
+          border-radius: 8px;
+        }
       }
     </style>
   </head>
