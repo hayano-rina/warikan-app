@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>割り勘アプリ - 複数グループ対応版</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        max-width: 700px;
+        margin: 0 auto;
+        background: #f8f9fa;
+        color: #333;
+      }
+      .card {
+        border: 1px solid #dee2e6;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .form-group {
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 0.9em;
+      }
+      input,
+      select {
+        padding: 8px;
+        width: 95%;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+      }
+      .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid #ced4da;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .checkbox-label {
+        font-weight: normal;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .checkbox-label input {
+        width: auto;
+      }
+      button {
+        padding: 10px 20px;
+        cursor: pointer;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        width: 100%;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      #settleBtn {
+        background: #28a745;
+      }
+      #settleBtn:hover {
+        background: #218838;
+      }
+      pre {
+        background: #212529;
+        color: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 0.9em;
+      }
+      .info {
+        background: #fff3cd;
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        margin-bottom: 15px;
+        border-left: 5px solid #ffc107;
+      }
+      .settlement-list {
+        list-style: none;
+        padding: 0;
+      }
+      .settlement-item {
+        background: #e8f5e9;
+        border-left: 5px solid #2e7d32;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-header">
+      <h1>割り勘アプリ 🛠️ (複数グループ対応)</h1>
+    </div>
+
+    <div class="info">
+      <label style="color: #856404">📁 操作するグループを切り替える</label>
+      <div style="display: flex; gap: 10px; margin-top: 5px">
+        <input
+          type="text"
+          id="targetGroupIdInput"
+          placeholder="過去に作ったグループIDを入力（貼り付け）してください"
+        />
+        <button id="loadGroupBtn" style="width: auto; background: #6c757d">
+          読み込む
+        </button>
+      </div>
+      <div style="margin-top: 10px; font-weight: bold">
+        選択中のグループ名:
+        <span id="currentGroupName" style="color: #dc3545; font-size: 1.1em"
+          >未選択</span
+        >
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>1. 新しいグループを作る</h3>
+      <div class="form-group">
+        <input
+          type="text"
+          id="groupNameInput"
+          placeholder="例: 東京旅行、金曜飲み会"
+        />
+      </div>
+      <button id="createGroupBtn">グループ作成</button>
+    </div>
+
+    <div class="card">
+      <h3>2. カテゴリ（傾斜）登録</h3>
+      <div class="form-group">
+        <label>カテゴリ名</label
+        ><input
+          type="text"
+          id="categoryNameInput"
+          placeholder="例: 多め、普通"
+        />
+      </div>
+      <div class="form-group">
+        <label>比率（重み）</label
+        ><input type="number" id="categoryWeightInput" step="0.1" value="1.0" />
+      </div>
+      <button id="createCategoryBtn">カテゴリ登録</button>
+    </div>
+
+    <div class="card">
+      <h3>3. メンバー追加</h3>
+      <div class="form-group">
+        <label>メンバー名</label
+        ><input type="text" id="memberNameInput" placeholder="例: 太郎" />
+      </div>
+      <div class="form-group">
+        <label>カテゴリ</label
+        ><select id="categorySelect">
+          <option value="">-- 先にカテゴリを登録 --</option>
+        </select>
+      </div>
+      <button id="createMemberBtn">メンバー追加</button>
+    </div>
+
+    <div class="card">
+      <h3>4. 支払い（立て替え）の記録</h3>
+      <div class="form-group">
+        <label>支払った人</label
+        ><select id="payerSelect">
+          <option value="">-- 先にメンバーを追加 --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>金額（円）</label
+        ><input type="number" id="paymentAmountInput" placeholder="例: 5000" />
+      </div>
+      <div class="form-group">
+        <label>内容</label
+        ><input
+          type="text"
+          id="paymentDescInput"
+          placeholder="例: レンタカー代"
+        />
+      </div>
+      <div class="form-group">
+        <label>割り勘の対象（誰の分？）</label>
+        <div class="checkbox-group" id="participantsGroup">
+          （メンバーを追加するとここに並びます）
+        </div>
+      </div>
+      <button id="createPaymentBtn">支払い記録を保存</button>
+    </div>
+
+    <div class="card" style="border: 2px solid #28a745">
+      <h3>5. 最終清算スクリプトを実行</h3>
+      <button id="settleBtn">選択中グループの清算結果を計算</button>
+      <div id="settlementResultArea" style="margin-top: 15px"></div>
+    </div>
+
+    <div class="card">
+      <h3>最新のAPI通信レスポンス（生データ）</h3>
+      <pre id="responseOutput">ここにAPIの返却データが表示されます</pre>
+    </div>
+
+    <script>
+      // 【要変更】ご自身のRenderのURLに書き換えてください
+      const API_BASE_URL = "https://warikan-app-d1pd.onrender.com/api";
+
+      let activeGroupId = "";
+
+      const responseOutput = document.getElementById("responseOutput");
+      const targetGroupIdInput = document.getElementById("targetGroupIdInput");
+      const currentGroupName = document.getElementById("currentGroupName");
+      const categorySelect = document.getElementById("categorySelect");
+      const payerSelect = document.getElementById("payerSelect");
+      const participantsGroup = document.getElementById("participantsGroup");
+      const settlementResultArea = document.getElementById(
+        "settlementResultArea",
+      );
+
+      const showResult = (data) => {
+        responseOutput.textContent = JSON.stringify(data, null, 2);
+      };
+
+      // ★最重要：グループの情報をサーバーから取得して画面を「そのグループ専用」に書き換える関数
+      async function fetchAndRefreshGroupDetails(groupId) {
+        if (!groupId) return;
+        try {
+          // API: GET /api/groups/:id (グループ詳細取得)
+          const res = await fetch(`${API_BASE_URL}/groups/${groupId}`);
+          if (!res.ok) throw new Error("グループが見つかりません");
+          const group = await res.json();
+          showResult(group);
+
+          activeGroupId = group.id;
+          targetGroupIdInput.value = group.id;
+          currentGroupName.textContent = `${group.name} (ID: ${group.id})`;
+          settlementResultArea.innerHTML = ""; // 前の清算結果をクリア
+
+          // 1. カテゴリドロップダウンをリフレッシュ
+          categorySelect.innerHTML =
+            group.categories.length === 0
+              ? '<option value="">-- 先にカテゴリを登録 --</option>'
+              : "";
+          group.categories.forEach((c) => {
+            const opt = document.createElement("option");
+            opt.value = c.id;
+            opt.textContent = `${c.name} (${c.weight}倍)`;
+            categorySelect.appendChild(opt);
+          });
+
+          // 2. 支払った人のドロップダウンをリフレッシュ
+          payerSelect.innerHTML =
+            group.members.length === 0
+              ? '<option value="">-- 先にメンバーを追加 --</option>'
+              : "";
+          group.members.forEach((m) => {
+            const opt = document.createElement("option");
+            opt.value = m.id;
+            opt.textContent = m.name;
+            payerSelect.appendChild(opt);
+          });
+
+          // 3. 割り勘対象チェックボックスをリフレッシュ
+          participantsGroup.innerHTML =
+            group.members.length === 0
+              ? "（メンバーを追加するとここに並びます）"
+              : "";
+          group.members.forEach((m) => {
+            const lbl = document.createElement("label");
+            lbl.className = "checkbox-label";
+            lbl.innerHTML = `<input type="checkbox" value="${m.id}" checked> ${m.name}`;
+            participantsGroup.appendChild(lbl);
+          });
+        } catch (e) {
+          alert(e.message);
+          currentGroupName.textContent = "未選択 (エラー)";
+        }
+      }
+
+      // 手動読み込みボタン
+      document.getElementById("loadGroupBtn").addEventListener("click", () => {
+        const id = targetGroupIdInput.value.trim();
+        if (!id) return alert("IDを入力してください");
+        fetchAndRefreshGroupDetails(id);
+      });
+
+      // 1. グループ作成
+      document
+        .getElementById("createGroupBtn")
+        .addEventListener("click", async () => {
+          const name = document.getElementById("groupNameInput").value.trim();
+          if (!name) return alert("グループ名を入力");
+          try {
+            const res = await fetch(`${API_BASE_URL}/groups`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+              document.getElementById("groupNameInput").value = "";
+              // 作成したらそのままそのグループを読み込む
+              await fetchAndRefreshGroupDetails(data.id);
+            } else {
+              showResult(data);
+            }
+          } catch (e) {
+            showResult({ error: e.message });
+          }
+        });
+
+      // 2. カテゴリ登録
+      document
+        .getElementById("createCategoryBtn")
+        .addEventListener("click", async () => {
+          if (!activeGroupId)
+            return alert("グループを選択または作成してください");
+          const name = document
+            .getElementById("categoryNameInput")
+            .value.trim();
+          const weight = document.getElementById("categoryWeightInput").value;
+          if (!name) return alert("カテゴリ名入力");
+          try {
+            const res = await fetch(
+              `${API_BASE_URL}/groups/${activeGroupId}/categories`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, weight }),
+              },
+            );
+            if (res.ok) {
+              document.getElementById("categoryNameInput").value = "";
+              await fetchAndRefreshGroupDetails(activeGroupId); // 最新状態にリフレッシュ
+            } else {
+              showResult(await res.json());
+            }
+          } catch (e) {
+            showResult({ error: e.message });
+          }
+        });
+
+      // 3. メンバー追加
+      document
+        .getElementById("createMemberBtn")
+        .addEventListener("click", async () => {
+          if (!activeGroupId)
+            return alert("グループを選択または作成してください");
+          const name = document.getElementById("memberNameInput").value.trim();
+          const categoryId = categorySelect.value;
+          if (!name || !categoryId) return alert("入力漏れがあります");
+          try {
+            const res = await fetch(
+              `${API_BASE_URL}/groups/${activeGroupId}/members`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, categoryId }),
+              },
+            );
+            if (res.ok) {
+              document.getElementById("memberNameInput").value = "";
+              await fetchAndRefreshGroupDetails(activeGroupId); // 最新状態にリフレッシュ
+            } else {
+              showResult(await res.json());
+            }
+          } catch (e) {
+            showResult({ error: e.message });
+          }
+        });
+
+      // 4. 支払い記録の登録
+      document
+        .getElementById("createPaymentBtn")
+        .addEventListener("click", async () => {
+          if (!activeGroupId) return alert("グループを選択してください");
+          const payerId = payerSelect.value;
+          const amount = document.getElementById("paymentAmountInput").value;
+          const description = document
+            .getElementById("paymentDescInput")
+            .value.trim();
+          const checkboxes = participantsGroup.querySelectorAll(
+            'input[type="checkbox"]:checked',
+          );
+          const participantIds = Array.from(checkboxes).map((cb) => cb.value);
+
+          if (!payerId || !amount || participantIds.length === 0)
+            return alert("入力項目が不足しています");
+
+          try {
+            const res = await fetch(
+              `${API_BASE_URL}/groups/${activeGroupId}/payments`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  payerId,
+                  amount,
+                  description,
+                  participantIds,
+                }),
+              },
+            );
+            const data = await res.json();
+            if (res.ok) {
+              alert("支払い記録を保存しました！");
+              document.getElementById("paymentAmountInput").value = "";
+              document.getElementById("paymentDescInput").value = "";
+              await fetchAndRefreshGroupDetails(activeGroupId);
+            } else {
+              showResult(data);
+            }
+          } catch (e) {
+            showResult({ error: e.message });
+          }
+        });
+
+      // 5. 清算結果の取得
+      document
+        .getElementById("settleBtn")
+        .addEventListener("click", async () => {
+          if (!activeGroupId) return alert("グループを選択してください");
+          settlementResultArea.innerHTML = "計算中...";
+          try {
+            const res = await fetch(
+              `${API_BASE_URL}/groups/${activeGroupId}/settlements`,
+            );
+            const data = await res.json();
+            showResult(data);
+            if (res.ok) {
+              if (data.length === 0) {
+                settlementResultArea.innerHTML =
+                  "<p>🎉 すべて清算済み、または支払いがありません！</p>";
+                return;
+              }
+              let html = '<ul class="settlement-list">';
+              data.forEach((s) => {
+                html += `<li class="settlement-item">💰 ${s.from.name} ➡ ${s.to.name} へ 【${s.amount.toLocaleString()} 円】 支払う</li>`;
+              });
+              html += "</ul>";
+              settlementResultArea.innerHTML = html;
+            }
+          } catch (e) {
+            settlementResultArea.innerHTML = "エラーが発生しました";
+          }
+        });
+    </script>
+  </body>
+</html>

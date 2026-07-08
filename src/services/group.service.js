@@ -19,6 +19,13 @@ exports.getGroupDetails = async (groupId) => {
   });
 };
 
+// 全グループを一覧で取得する（新しく追加）
+exports.getAllGroups = async () => {
+  return await prisma.group.findMany({
+    orderBy: { createdAt: "desc" }, // 新しい順に並べる
+  });
+};
+
 // 3. カテゴリ作成
 exports.createCategory = async (groupId, name, weight) => {
   return await prisma.category.create({

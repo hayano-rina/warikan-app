@@ -3,6 +3,13 @@ const router = express.Router();
 // ※各コントローラーの関数は後ほど作成する想定です
 const groupController = require("../controllers/group.controller");
 
+const express = require("express");
+const router = express.Router();
+const groupController = require("../controllers/group.controller");
+
+// ★ここに追記（/:id より上に書くのがNode.jsのルールです）
+router.get("/", groupController.getAllGroups);
+
 // 1. 新しいグループを作成する
 router.post("/", groupController.createGroup);
 

@@ -81,3 +81,13 @@ exports.getSettlements = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// 全グループを一覧で取得する（新しく追加）
+exports.getAllGroups = async (req, res) => {
+  try {
+    const groups = await groupService.getAllGroups();
+    res.json(groups);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
