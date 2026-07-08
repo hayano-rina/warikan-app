@@ -320,14 +320,28 @@
             memberListOutput.appendChild(li);
           });
 
-          // 🌟 新機能2: 支払い履歴一覧をわかりやすくリスト表示
+          // 🌟 新機能2: 支払い履歴一覧をわかりやすくリスト表示（対象メンバーの並び替え・追加版）
           paymentListOutput.innerHTML =
             group.payments.length === 0
               ? '<li style="color:#888;">履歴はありません</li>'
               : "";
           group.payments.forEach((p) => {
             const li = document.createElement("li");
-            li.innerHTML = `💸 <strong>${p.amount.toLocaleString()}円</strong> - ${p.description || "無題"}<br><small style="color:#666;">支払者: ${p.payer.name}</small>`;
+
+            // 参加者全員の名前を「、」で繋いだ文字列を作る
+            // ※バックエンドのデータ構造に合わせて、p.participants 内の member.name を集めます
+            const participantNames =
+              p.participants && p.participants.length > 0
+                ? p.participants.map((part) => part.member.name).join("、")
+                : "全員";
+
+            li.innerHTML = `
+              💸 <strong>${p.amount.toLocaleString()}円</strong> - ${p.description || "無題"}<br>
+              <small style="color:#666;">
+                支払者: <strong>${p.payer.name}</strong><br>
+                対象者: [ ${participantNames} ]
+              </small>
+            `;
             paymentListOutput.appendChild(li);
           });
 
