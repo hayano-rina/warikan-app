@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>割り勘アプリ - プルダウン選択版</title>
+    <title>割り勘アプリ</title>
     <style>
       body {
         font-family: sans-serif;
         padding: 20px;
-        max-width: 700px;
+        max-width: 750px;
         margin: 0 auto;
         background: #f8f9fa;
         color: #333;
@@ -75,14 +75,6 @@
       #settleBtn:hover {
         background: #218838;
       }
-      pre {
-        background: #212529;
-        color: #f8f9fa;
-        padding: 15px;
-        border-radius: 4px;
-        overflow-x: auto;
-        font-size: 0.9em;
-      }
       .info {
         background: #e8f4fd;
         padding: 15px;
@@ -91,15 +83,61 @@
         margin-bottom: 15px;
         border-left: 5px solid #007bff;
       }
+
+      /* 🌟 リスト表示用の新しいスタイル */
+      .flex-container {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .flex-child {
+        flex: 1;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        padding: 15px;
+        border-radius: 8px;
+      }
+      .data-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .data-list li {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9em;
+      }
+      .data-list li:last-child {
+        border-bottom: none;
+      }
+      .badge {
+        background: #6c757d;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        margin-left: 5px;
+        font-weight: bold;
+      }
+      .settlement-list {
+        list-style: none;
+        padding: 0;
+      }
+      .settlement-item {
+        background: #e8f5e9;
+        border-left: 5px solid #2e7d32;
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
-    <h1>割り勘アプリ 📱 (グループ選択機能付き)</h1>
+    <h1>割り勘アプリ 📱</h1>
 
     <div class="info">
-      <label style="color: #0056b3; font-size: 1em"
-        >📁 操作するグループを選択</label
-      >
+      <label style="color: #0056b3">📁 操作するグループを選択</label>
       <select
         id="groupSelect"
         style="margin-top: 5px; width: 100%; font-size: 1.05em; padding: 10px"
@@ -108,14 +146,41 @@
       </select>
     </div>
 
+    <div class="flex-container">
+      <div class="flex-child">
+        <h4
+          style="
+            margin-top: 0;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+          "
+        >
+          👥 登録メンバー
+        </h4>
+        <ul id="memberListOutput" class="data-list">
+          <li style="color: #888">グループを選択してください</li>
+        </ul>
+      </div>
+      <div class="flex-child">
+        <h4
+          style="
+            margin-top: 0;
+            border-bottom: 2px solid #dc3545;
+            padding-bottom: 5px;
+          "
+        >
+          🧾 支払い履歴
+        </h4>
+        <ul id="paymentListOutput" class="data-list">
+          <li style="color: #888">グループを選択してください</li>
+        </ul>
+      </div>
+    </div>
+
     <div class="card">
       <h3>1. 新しいグループを作る</h3>
       <div class="form-group">
-        <input
-          type="text"
-          id="groupNameInput"
-          placeholder="例: スキー旅行、女子会"
-        />
+        <input type="text" id="groupNameInput" placeholder="例: スキー旅行" />
       </div>
       <button id="createGroupBtn">グループ作成</button>
     </div>
@@ -155,8 +220,8 @@
     <div class="card">
       <h3>4. 支払い（立て替え）の記録</h3>
       <div class="form-group">
-        <label>支払った人</label
-        ><select id="payerSelect">
+        <label>支払った人</label>
+        <select id="payerSelect">
           <option value="">-- 先にメンバーを追加 --</option>
         </select>
       </div>
@@ -183,22 +248,16 @@
 
     <div class="card" style="border: 2px solid #28a745">
       <h3>5. 最終清算スクリプトを実行</h3>
-      <button id="settleBtn">選択中グループの清算結果を計算</button>
+      <button id="settleBtn">このグループの清算結果を計算</button>
       <div id="settlementResultArea" style="margin-top: 15px"></div>
     </div>
 
-    <div class="card">
-      <h3>最新のAPI通信レスポンス（生データ）</h3>
-      <pre id="responseOutput">ここにAPIの返却データが表示されます</pre>
-    </div>
-
     <script>
-      // 【要変更】ご自身のRenderのURLに書き換えてください
+      // パスを相対パスに一本化したため、このままどこでも動きます！
       const API_BASE_URL = "/api";
 
       let activeGroupId = "";
 
-      const responseOutput = document.getElementById("responseOutput");
       const groupSelect = document.getElementById("groupSelect");
       const categorySelect = document.getElementById("categorySelect");
       const payerSelect = document.getElementById("payerSelect");
@@ -207,11 +266,11 @@
         "settlementResultArea",
       );
 
-      const showResult = (data) => {
-        responseOutput.textContent = JSON.stringify(data, null, 2);
-      };
+      // 新しい登録リスト用エレメント
+      const memberListOutput = document.getElementById("memberListOutput");
+      const paymentListOutput = document.getElementById("paymentListOutput");
 
-      // 🌟 新機能：DBにあるグループ一覧をすべて取得してプルダウンを構築する
+      // DBにあるグループ一覧を取得してプルダウンを構築
       async function loadGroupList(selectedId = null) {
         try {
           const res = await fetch(`${API_BASE_URL}/groups`);
@@ -236,7 +295,7 @@
         }
       }
 
-      // 選択されたグループの詳細データを読み込む
+      // 選択されたグループの詳細データを読み込み、すべてのリスト・プルダウンを連動リフレッシュ
       async function fetchAndRefreshGroupDetails(groupId) {
         if (!groupId) {
           clearFormFields();
@@ -246,12 +305,33 @@
           const res = await fetch(`${API_BASE_URL}/groups/${groupId}`);
           if (!res.ok) throw new Error("グループが見つかりません");
           const group = await res.json();
-          showResult(group);
 
           activeGroupId = group.id;
           settlementResultArea.innerHTML = "";
 
-          // 1. カテゴリドロップダウン
+          // 🌟 新機能1: 登録メンバーリストを表示 (所属カテゴリと比率付き)
+          memberListOutput.innerHTML =
+            group.members.length === 0
+              ? '<li style="color:#888;">メンバーはいません</li>'
+              : "";
+          group.members.forEach((m) => {
+            const li = document.createElement("li");
+            li.innerHTML = `👤 <strong>${m.name}</strong> <span class="badge">${m.category.name} (${m.category.weight}倍)</span>`;
+            memberListOutput.appendChild(li);
+          });
+
+          // 🌟 新機能2: 支払い履歴一覧をわかりやすくリスト表示
+          paymentListOutput.innerHTML =
+            group.payments.length === 0
+              ? '<li style="color:#888;">履歴はありません</li>'
+              : "";
+          group.payments.forEach((p) => {
+            const li = document.createElement("li");
+            li.innerHTML = `💸 <strong>${p.amount.toLocaleString()}円</strong> - ${p.description || "無題"}<br><small style="color:#666;">支払者: ${p.payer.name}</small>`;
+            paymentListOutput.appendChild(li);
+          });
+
+          // 3. カテゴリ登録用のプルダウン
           categorySelect.innerHTML =
             group.categories.length === 0
               ? '<option value="">-- 先にカテゴリを登録 --</option>'
@@ -263,7 +343,7 @@
             categorySelect.appendChild(opt);
           });
 
-          // 2. 支払った人ドロップダウン
+          // 🌟 新機能3: 支払った人ドロップダウンにカテゴリを（かっこ）で併記
           payerSelect.innerHTML =
             group.members.length === 0
               ? '<option value="">-- 先にメンバーを追加 --</option>'
@@ -271,11 +351,11 @@
           group.members.forEach((m) => {
             const opt = document.createElement("option");
             opt.value = m.id;
-            opt.textContent = m.name;
+            opt.textContent = `${m.name} (${m.category.name})`; // カッコ書きを追加！
             payerSelect.appendChild(opt);
           });
 
-          // 3. チェックボックス
+          // 5. 割り勘対象チェックボックス（ここにもカッコ表記を導入！）
           participantsGroup.innerHTML =
             group.members.length === 0
               ? "（メンバーを追加するとここに並びます）"
@@ -283,11 +363,11 @@
           group.members.forEach((m) => {
             const lbl = document.createElement("label");
             lbl.className = "checkbox-label";
-            lbl.innerHTML = `<input type="checkbox" value="${m.id}" checked> ${m.name}`;
+            lbl.innerHTML = `<input type="checkbox" value="${m.id}" checked> ${m.name} <span style="color:#777; font-size:0.85em;">(${m.category.name})</span>`;
             participantsGroup.appendChild(lbl);
           });
         } catch (e) {
-          alert(e.message);
+          alert("データ取得エラー: " + e.message);
         }
       }
 
@@ -298,10 +378,13 @@
         payerSelect.innerHTML =
           '<option value="">-- 先にメンバーを追加 --</option>';
         participantsGroup.innerHTML = "（メンバーを追加するとここに並びます）";
+        memberListOutput.innerHTML =
+          '<li style="color:#888;">グループを選択してください</li>';
+        paymentListOutput.innerHTML =
+          '<li style="color:#888;">グループを選択してください</li>';
         settlementResultArea.innerHTML = "";
       }
 
-      // プルダウンが切り替わった時のイベント
       groupSelect.addEventListener("change", (e) => {
         fetchAndRefreshGroupDetails(e.target.value);
       });
@@ -321,13 +404,10 @@
             const data = await res.json();
             if (res.ok) {
               document.getElementById("groupNameInput").value = "";
-              // リロードして、今作ったグループを選択状態にする
               await loadGroupList(data.id);
-            } else {
-              showResult(data);
             }
           } catch (e) {
-            showResult({ error: e.message });
+            alert(e.message);
           }
         });
 
@@ -353,11 +433,9 @@
             if (res.ok) {
               document.getElementById("categoryNameInput").value = "";
               await fetchAndRefreshGroupDetails(activeGroupId);
-            } else {
-              showResult(await res.json());
             }
           } catch (e) {
-            showResult({ error: e.message });
+            alert(e.message);
           }
         });
 
@@ -381,11 +459,9 @@
             if (res.ok) {
               document.getElementById("memberNameInput").value = "";
               await fetchAndRefreshGroupDetails(activeGroupId);
-            } else {
-              showResult(await res.json());
             }
           } catch (e) {
-            showResult({ error: e.message });
+            alert(e.message);
           }
         });
 
@@ -421,17 +497,14 @@
                 }),
               },
             );
-            const data = await res.json();
             if (res.ok) {
               alert("支払い記録を保存しました！");
               document.getElementById("paymentAmountInput").value = "";
               document.getElementById("paymentDescInput").value = "";
               await fetchAndRefreshGroupDetails(activeGroupId);
-            } else {
-              showResult(data);
             }
           } catch (e) {
-            showResult({ error: e.message });
+            alert(e.message);
           }
         });
 
@@ -446,7 +519,6 @@
               `${API_BASE_URL}/groups/${activeGroupId}/settlements`,
             );
             const data = await res.json();
-            showResult(data);
             if (res.ok) {
               if (data.length === 0) {
                 settlementResultArea.innerHTML =
@@ -465,7 +537,6 @@
           }
         });
 
-      // ページを開いた瞬間に一回だけグループ一覧を読み込む
       loadGroupList();
     </script>
   </body>
