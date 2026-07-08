@@ -65,6 +65,7 @@ exports.createPayment = async (req, res) => {
       amount,
       description,
       participantIds,
+      date,
     );
     res.status(201).json(payment);
   } catch (error) {

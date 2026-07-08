@@ -52,6 +52,7 @@ model Payment {
   id          String   @id @default(uuid())
   groupId     String
   payerId     String   // 誰が払ったか
+  date        DateTime @default(now())
   amount      Int      // 金額
   description String   // 内容
   createdAt   DateTime @default(now())

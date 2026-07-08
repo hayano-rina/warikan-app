@@ -226,6 +226,9 @@
         </select>
       </div>
       <div class="form-group">
+        <label>日付</label><input type="date" id="paymentDateInput" />
+      </div>
+      <div class="form-group">
         <label>金額（円）</label
         ><input type="number" id="paymentAmountInput" placeholder="例: 5000" />
       </div>
@@ -328,15 +331,19 @@
           group.payments.forEach((p) => {
             const li = document.createElement("li");
 
-            // 参加者全員の名前を「、」で繋いだ文字列を作る
-            // ※バックエンドのデータ構造に合わせて、p.participants 内の member.name を集めます
             const participantNames =
               p.participants && p.participants.length > 0
                 ? p.participants.map((part) => part.member.name).join("、")
                 : "全員";
 
+            // 🌟 日付を「YYYY/MM/DD」の形式に綺麗に変換する
+            const formattedDate = p.date
+              ? new Date(p.date).toLocaleDateString("ja-JP")
+              : "日付なし";
+
             li.innerHTML = `
-              💸 <strong>${p.amount.toLocaleString()}円</strong> - ${p.description || "無題"}<br>
+              💸 <strong>${p.amount.toLocaleString()}円</strong> - ${p.description || "無題"} 
+              <span style="color: #666; font-size: 0.85em; margin-left: 10px;">📅 ${formattedDate}</span><br>
               <small style="color:#666;">
                 支払者: <strong>${p.payer.name}</strong><br>
                 対象者: [ ${participantNames} ]
@@ -485,6 +492,7 @@
         .addEventListener("click", async () => {
           if (!activeGroupId) return alert("グループを選択してください");
           const payerId = payerSelect.value;
+          const date = document.getElementById("paymentDateInput").value; // 🌟 日付の値を取得
           const amount = document.getElementById("paymentAmountInput").value;
           const description = document
             .getElementById("paymentDescInput")
@@ -508,11 +516,13 @@
                   amount,
                   description,
                   participantIds,
-                }),
+                  date,
+                }), // 🌟 bodyに date を追加！
               },
             );
             if (res.ok) {
               alert("支払い記録を保存しました！");
+              document.getElementById("paymentDateInput").value = ""; // 🌟 入力欄をクリア
               document.getElementById("paymentAmountInput").value = "";
               document.getElementById("paymentDescInput").value = "";
               await fetchAndRefreshGroupDetails(activeGroupId);

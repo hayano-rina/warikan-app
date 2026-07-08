@@ -47,21 +47,39 @@ exports.createPayment = async (
   amount,
   description,
   participantIds,
+  date,
 ) => {
   return await prisma.$transaction(async (tx) => {
-    // 支払いデータを作成
+    // 1. 支払いデータを作成
     const payment = await tx.payment.create({
-      data: { groupId, payerId, amount: parseInt(amount), description },
+      data: {
+        groupId,
+        payerId,
+        amount: parseInt(amount),
+        description,
+        date: date ? new Date(date) : undefined,
+      },
     });
 
-    // 参加者（中間テーブル）を一括登録
+    // 2. 参加者（中間テーブル）を一括登録
     const participantData = participantIds.map((memberId) => ({
       paymentId: payment.id,
       memberId,
     }));
     await tx.paymentParticipant.createMany({ data: participantData });
 
-    return payment;
+    // 🌟 3. 【ここを修正】画面のリスト表示に必要な関連データをまとめて取得して返す
+    return await tx.payment.findUnique({
+      where: { id: payment.id },
+      include: {
+        payer: true, // 支払った人の名前を表示するのに必要
+        participants: {
+          include: {
+            member: true, // 割り勘対象者の名前を表示するのに必要
+          },
+        },
+      },
+    });
   });
 };
 
