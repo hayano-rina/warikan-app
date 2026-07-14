@@ -3,23 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>割り勘アプリ</title>
+    <title>割り勘アプリ - Wari-Kan</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
       /* 🎨 カラーパレット定義 */
       :root {
-        --primary-green: #2ec4b6; /* テーマカラー：やさしいミントグリーン */
-        --primary-green-dark: #20a497; /* ボタンホバー時の濃い緑 */
-        --member-blue: #3a86c8; /* メンバーのテーマ：ブルー */
-        --payment-orange: #f77f00; /* 支払い履歴のテーマ：暖色オレンジ */
-        --settle-green: #2a9d8f; /* 清算結果のテーマ：深めのグリーン */
-        --bg-light: #f7f9f8; /* 全体の背景：ごく薄い緑がかったグレー */
-        --text-main: #2d3748; /* メインの文字色 */
+        --primary-green: #2ec4b6;
+        --primary-green-dark: #20a497;
+        --member-blue: #3a86c8;
+        --payment-orange: #f77f00;
+        --settle-green: #2a9d8f;
+        --bg-light: #f7f9f8;
+        --text-main: #2d3748;
       }
 
       body {
         font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Sans-Serif;
         padding: 15px;
         max-width: 750px;
         margin: 0 auto;
@@ -28,7 +31,6 @@
         line-height: 1.6;
       }
 
-      /* ヘッダーデザイン */
       header {
         text-align: center;
         margin-bottom: 25px;
@@ -45,7 +47,7 @@
         gap: 10px;
       }
 
-      /* 📁 グループ選択エリア（やさしい緑ベース） */
+      /* 📁 グループ選択エリア */
       .info {
         background: #e6f7f4;
         padding: 18px;
@@ -57,11 +59,45 @@
       }
       .info label {
         color: var(--primary-green-dark);
-        font-size: 1em;
+        font-weight: bold;
         display: flex;
         align-items: center;
         gap: 8px;
         margin-bottom: 8px;
+      }
+
+      /* 🌟 画面分岐用のタブスタイル */
+      .tab-menu {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .tab-btn {
+        flex: 1;
+        padding: 12px;
+        background: #e2e8f0;
+        color: #4a5568;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+      .tab-btn.active {
+        background: var(--primary-green);
+        color: white;
+        box-shadow: 0 4px 10px rgba(46, 196, 182, 0.2);
+      }
+      /* 初期状態では中身を非表示にする設定用クラス */
+      .view-section {
+        display: none;
+      }
+      .view-section.active {
+        display: block;
       }
 
       /* 共通カードデザイン */
@@ -84,7 +120,6 @@
         align-items: center;
         gap: 8px;
       }
-
       .form-group {
         margin-bottom: 16px;
       }
@@ -105,7 +140,6 @@
         border-radius: 8px;
         font-size: 16px;
         background-color: #fff;
-        transition: border-color 0.2s;
       }
       input:focus,
       select:focus {
@@ -113,7 +147,6 @@
         border-color: var(--primary-green);
       }
 
-      /* 割り勘チェックボックス */
       .checkbox-group {
         display: flex;
         flex-direction: column;
@@ -131,7 +164,6 @@
         align-items: center;
         gap: 10px;
         cursor: pointer;
-        font-size: 0.95em;
       }
       .checkbox-label input {
         width: auto;
@@ -140,7 +172,6 @@
         accent-color: var(--primary-green);
       }
 
-      /* 統一された緑ボタン */
       button {
         padding: 12px 20px;
         cursor: pointer;
@@ -149,24 +180,16 @@
         border: none;
         border-radius: 8px;
         font-weight: bold;
-        font-size: 1em;
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        transition:
-          background 0.2s,
-          transform 0.1s;
+        transition: background 0.2s;
       }
       button:hover {
         background: var(--primary-green-dark);
       }
-      button:active {
-        transform: scale(0.98);
-      }
-
-      /* 特別な清算実行ボタン */
       #settleBtn {
         background: var(--settle-green);
       }
@@ -174,7 +197,7 @@
         background: #218276;
       }
 
-      /* 🌟 リスト表示（2カラム）の色分け工夫 */
+      /* リスト表示（2カラム） */
       .flex-container {
         display: flex;
         gap: 20px;
@@ -186,10 +209,8 @@
         border: 1px solid #e2e8f0;
         padding: 18px;
         border-radius: 14px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
       }
 
-      /* 👥 メンバーリスト（ブルー系に色分け） */
       .member-header {
         margin-top: 0;
         border-bottom: 2.5px solid var(--member-blue);
@@ -198,7 +219,6 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 1.05em;
       }
       .member-item-li {
         border-left: 3px solid var(--member-blue);
@@ -217,7 +237,6 @@
         font-weight: bold;
       }
 
-      /* 🧾 支払い履歴（暖色オレンジ系に色分け） */
       .payment-header {
         margin-top: 0;
         border-bottom: 2.5px solid var(--payment-orange);
@@ -226,7 +245,6 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 1.05em;
       }
       .payment-item-li {
         border-left: 3px solid var(--payment-orange);
@@ -246,7 +264,6 @@
         font-size: 0.9em;
       }
 
-      /* 清算結果（深緑系） */
       .settlement-list {
         list-style: none;
         padding: 0;
@@ -263,7 +280,6 @@
         gap: 10px;
         color: #1b4d3e;
       }
-
       pre {
         background: #1a202c;
         color: #edf2f7;
@@ -273,157 +289,177 @@
         font-size: 0.85em;
       }
 
-      /* 📱 【超重要】スマートフォン（画面幅768px以下）用の設定 */
       @media (max-width: 768px) {
         body {
-          padding: 10px;
+          padding: 12px;
         }
-        h1 {
-          font-size: 1.5em;
-        }
-
-        /* 2カラムだったメンバー・履歴リストを「縦並び」に強制変換 */
         .flex-container {
           flex-direction: column;
           gap: 15px;
-        }
-
-        /* 入力欄の左右パディングを少し狭めて画面を広く使う */
-        .card {
-          padding: 15px;
-          border-radius: 8px;
         }
       }
     </style>
   </head>
   <body>
-    <h1>割り勘アプリ 📱</h1>
+    <header>
+      <h1><i class="fa-solid fa-scale-balanced"></i> Wari-Kan</h1>
+    </header>
 
     <div class="info">
-      <label style="color: #0056b3">📁 操作するグループを選択</label>
+      <label
+        ><i class="fa-solid fa-folder-open"></i> 操作するグループを選択</label
+      >
       <select
         id="groupSelect"
-        style="margin-top: 5px; width: 100%; font-size: 1.05em; padding: 10px"
+        style="margin-top: 5px; width: 100%; font-size: 1.05em; padding: 11px"
       >
         <option value="">-- グループを読み込み中... --</option>
       </select>
     </div>
 
-    <div class="flex-container">
-      <div class="flex-child">
-        <h4
-          style="
-            margin-top: 0;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 5px;
-          "
-        >
-          👥 登録メンバー
-        </h4>
-        <ul id="memberListOutput" class="data-list">
-          <li style="color: #888">グループを選択してください</li>
-        </ul>
-      </div>
-      <div class="flex-child">
-        <h4
-          style="
-            margin-top: 0;
-            border-bottom: 2px solid #dc3545;
-            padding-bottom: 5px;
-          "
-        >
-          🧾 支払い履歴
-        </h4>
-        <ul id="paymentListOutput" class="data-list">
-          <li style="color: #888">グループを選択してください</li>
-        </ul>
-      </div>
+    <div class="tab-menu">
+      <button class="tab-btn active" id="btnUserView">
+        <i class="fa-solid fa-wallet"></i> 割り勘・精算 (一般)
+      </button>
+      <button class="tab-btn" id="btnAdminView">
+        <i class="fa-solid fa-list-check"></i> グループ管理 (設定)
+      </button>
     </div>
 
-    <div class="card">
-      <h3>1. 新しいグループを作る</h3>
-      <div class="form-group">
-        <input type="text" id="groupNameInput" placeholder="例: スキー旅行" />
-      </div>
-      <button id="createGroupBtn">グループ作成</button>
-    </div>
-
-    <div class="card">
-      <h3>2. カテゴリ（傾斜）登録</h3>
-      <div class="form-group">
-        <label>カテゴリ名</label
-        ><input
-          type="text"
-          id="categoryNameInput"
-          placeholder="例: 多め、普通"
-        />
-      </div>
-      <div class="form-group">
-        <label>比率（重み）</label
-        ><input type="number" id="categoryWeightInput" step="0.1" value="1.0" />
-      </div>
-      <button id="createCategoryBtn">カテゴリ登録</button>
-    </div>
-
-    <div class="card">
-      <h3>3. メンバー追加</h3>
-      <div class="form-group">
-        <label>メンバー名</label
-        ><input type="text" id="memberNameInput" placeholder="例: 太郎" />
-      </div>
-      <div class="form-group">
-        <label>カテゴリ</label
-        ><select id="categorySelect">
-          <option value="">-- 先にカテゴリを登録 --</option>
-        </select>
-      </div>
-      <button id="createMemberBtn">メンバー追加</button>
-    </div>
-
-    <div class="card">
-      <h3>4. 支払い（立て替え）の記録</h3>
-      <div class="form-group">
-        <label>支払った人</label>
-        <select id="payerSelect">
-          <option value="">-- 先にメンバーを追加 --</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>日付</label><input type="date" id="paymentDateInput" />
-      </div>
-      <div class="form-group">
-        <label>金額（円）</label
-        ><input type="number" id="paymentAmountInput" placeholder="例: 5000" />
-      </div>
-      <div class="form-group">
-        <label>内容</label
-        ><input
-          type="text"
-          id="paymentDescInput"
-          placeholder="例: レンタカー代"
-        />
-      </div>
-      <div class="form-group">
-        <label>割り勘の対象（誰の分？）</label>
-        <div class="checkbox-group" id="participantsGroup">
-          （メンバーを追加するとここに並びます）
+    <div id="sectionUserView" class="view-section active">
+      <div class="flex-container">
+        <div class="flex-child">
+          <h4 class="member-header">
+            <i class="fa-solid fa-users"></i> 登録メンバー
+          </h4>
+          <ul id="memberListOutput" class="data-list">
+            <li style="color: #888">グループを選択してください</li>
+          </ul>
+        </div>
+        <div class="flex-child">
+          <h4 class="payment-header">
+            <i class="fa-solid fa-receipt"></i> 支払い履歴
+          </h4>
+          <ul id="paymentListOutput" class="data-list">
+            <li style="color: #888">グループを選択してください</li>
+          </ul>
         </div>
       </div>
-      <button id="createPaymentBtn">支払い記録を保存</button>
+
+      <div class="card">
+        <h3>
+          <i class="fa-solid fa-credit-card"></i> 支払い（立て替え）の記録
+        </h3>
+        <div class="form-group">
+          <label>支払った人</label
+          ><select id="payerSelect">
+            <option value="">-- 先にメンバーを追加 --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>日付</label><input type="date" id="paymentDateInput" />
+        </div>
+        <div class="form-group">
+          <label>金額（円）</label
+          ><input
+            type="number"
+            id="paymentAmountInput"
+            placeholder="例: 5000"
+          />
+        </div>
+        <div class="form-group">
+          <label>内容</label
+          ><input
+            type="text"
+            id="paymentDescInput"
+            placeholder="例: レンタカー代"
+          />
+        </div>
+        <div class="form-group">
+          <label>割り勘の対象（誰の分？）</label>
+          <div class="checkbox-group" id="participantsGroup">
+            （メンバーを追加するとここに並びます）
+          </div>
+        </div>
+        <button id="createPaymentBtn">
+          <i class="fa-solid fa-floppy-disk"></i> 支払い記録を保存
+        </button>
+      </div>
+
+      <div class="card" style="border: 2.5px solid var(--settle-green)">
+        <h3 style="border-left-color: var(--settle-green)">
+          <i class="fa-solid fa-handshake"></i> 最終清算スクリプトを実行
+        </h3>
+        <button id="settleBtn">
+          <i class="fa-solid fa-calculator"></i> このグループの清算結果を計算
+        </button>
+        <div id="settlementResultArea" style="margin-top: 15px"></div>
+      </div>
     </div>
 
-    <div class="card" style="border: 2px solid #28a745">
-      <h3>5. 最終清算スクリプトを実行</h3>
-      <button id="settleBtn">このグループの清算結果を計算</button>
-      <div id="settlementResultArea" style="margin-top: 15px"></div>
+    <div id="sectionAdminView" class="view-section">
+      <div class="card">
+        <h3><i class="fa-solid fa-plus"></i> 新しいグループを作る</h3>
+        <div class="form-group">
+          <input type="text" id="groupNameInput" placeholder="例: スキー旅行" />
+        </div>
+        <button id="createGroupBtn">
+          <i class="fa-solid fa-check"></i> グループ作成
+        </button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-tags"></i> カテゴリ（傾斜）登録</h3>
+        <div class="form-group">
+          <label>カテゴリ名</label
+          ><input
+            type="text"
+            id="categoryNameInput"
+            placeholder="例: 多め、普通"
+          />
+        </div>
+        <div class="form-group">
+          <label>比率（重み）</label
+          ><input
+            type="number"
+            id="categoryWeightInput"
+            step="0.1"
+            value="1.0"
+          />
+        </div>
+        <button id="createCategoryBtn">
+          <i class="fa-solid fa-check"></i> カテゴリ登録
+        </button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-user-plus"></i> メンバー追加</h3>
+        <div class="form-group">
+          <label>メンバー名</label
+          ><input type="text" id="memberNameInput" placeholder="例: 太郎" />
+        </div>
+        <div class="form-group">
+          <label>カテゴリ</label
+          ><select id="categorySelect">
+            <option value="">-- 先にカテゴリを登録 --</option>
+          </select>
+        </div>
+        <button id="createMemberBtn">
+          <i class="fa-solid fa-check"></i> メンバー追加
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-terminal"></i> 最新のAPI通信レスポンス</h3>
+      <pre id="responseOutput">ここにAPIの返却データが表示されます</pre>
     </div>
 
     <script>
-      // パスを相対パスに一本化したため、このままどこでも動きます！
       const API_BASE_URL = "/api";
-
       let activeGroupId = "";
 
+      // DOMの取得
       const groupSelect = document.getElementById("groupSelect");
       const categorySelect = document.getElementById("categorySelect");
       const payerSelect = document.getElementById("payerSelect");
@@ -431,17 +467,38 @@
       const settlementResultArea = document.getElementById(
         "settlementResultArea",
       );
-
-      // 新しい登録リスト用エレメント
       const memberListOutput = document.getElementById("memberListOutput");
       const paymentListOutput = document.getElementById("paymentListOutput");
+      const responseOutput = document.getElementById("responseOutput");
 
-      // DBにあるグループ一覧を取得してプルダウンを構築
+      // 🌟 新機能：タブ切り替えのイベント設定
+      const btnUserView = document.getElementById("btnUserView");
+      const btnAdminView = document.getElementById("btnAdminView");
+      const sectionUserView = document.getElementById("sectionUserView");
+      const sectionAdminView = document.getElementById("sectionAdminView");
+
+      btnUserView.addEventListener("click", () => {
+        btnUserView.classList.add("active");
+        btnAdminView.classList.remove("active");
+        sectionUserView.classList.add("active");
+        sectionAdminView.classList.remove("active");
+      });
+      btnAdminView.addEventListener("click", () => {
+        btnAdminView.classList.add("active");
+        btnUserView.classList.remove("active");
+        sectionAdminView.classList.add("active");
+        sectionUserView.classList.remove("active");
+      });
+
+      const showResult = (data) => {
+        responseOutput.textContent = JSON.stringify(data, null, 2);
+      };
+
+      // 以下、API通信ロジック（前回の内容と同一）
       async function loadGroupList(selectedId = null) {
         try {
           const res = await fetch(`${API_BASE_URL}/groups`);
           const groups = await res.json();
-
           groupSelect.innerHTML =
             '<option value="">-- グループを選択してください --</option>';
           groups.forEach((g) => {
@@ -451,17 +508,13 @@
             if (g.id === selectedId) opt.selected = true;
             groupSelect.appendChild(opt);
           });
-
-          if (selectedId) {
-            await fetchAndRefreshGroupDetails(selectedId);
-          }
+          if (selectedId) await fetchAndRefreshGroupDetails(selectedId);
         } catch (e) {
           groupSelect.innerHTML =
-            '<option value="">エラー: グループを読み込めませんでした</option>';
+            '<option value="">エラー: グループ読み込み失敗</option>';
         }
       }
 
-      // 選択されたグループの詳細データを読み込み、すべてのリスト・プルダウンを連動リフレッシュ
       async function fetchAndRefreshGroupDetails(groupId) {
         if (!groupId) {
           clearFormFields();
@@ -471,51 +524,44 @@
           const res = await fetch(`${API_BASE_URL}/groups/${groupId}`);
           if (!res.ok) throw new Error("グループが見つかりません");
           const group = await res.json();
-
           activeGroupId = group.id;
           settlementResultArea.innerHTML = "";
 
-          // 🌟 新機能1: 登録メンバーリストを表示 (所属カテゴリと比率付き)
+          // 👥 メンバーリスト
           memberListOutput.innerHTML =
             group.members.length === 0
               ? '<li style="color:#888;">メンバーはいません</li>'
               : "";
           group.members.forEach((m) => {
             const li = document.createElement("li");
-            li.innerHTML = `👤 <strong>${m.name}</strong> <span class="badge">${m.category.name} (${m.category.weight}倍)</span>`;
+            li.className = "member-item-li";
+            li.innerHTML = `<i class="fa-regular fa-user" style="color: var(--member-blue); margin-right: 5px;"></i> <strong>${m.name}</strong> <span class="badge">${m.category.name} (${m.category.weight}倍)</span>`;
             memberListOutput.appendChild(li);
           });
 
-          // 🌟 新機能2: 支払い履歴一覧をわかりやすくリスト表示（対象メンバーの並び替え・追加版）
+          // 🧾 支払い履歴
           paymentListOutput.innerHTML =
             group.payments.length === 0
               ? '<li style="color:#888;">履歴はありません</li>'
               : "";
           group.payments.forEach((p) => {
             const li = document.createElement("li");
-
+            li.className = "payment-item-li";
             const participantNames =
               p.participants && p.participants.length > 0
                 ? p.participants.map((part) => part.member.name).join("、")
                 : "全員";
-
-            // 🌟 日付を「YYYY/MM/DD」の形式に綺麗に変換する
             const formattedDate = p.date
               ? new Date(p.date).toLocaleDateString("ja-JP")
-              : "日付なし";
-
+              : "日付未登録";
             li.innerHTML = `
-              💸 <strong>${p.amount.toLocaleString()}円</strong> - ${p.description || "無題"} 
-              <span style="color: #666; font-size: 0.85em; margin-left: 10px;">📅 ${formattedDate}</span><br>
-              <small style="color:#666;">
-                支払者: <strong>${p.payer.name}</strong><br>
-                対象者: [ ${participantNames} ]
-              </small>
-            `;
+                        <i class="fa-solid fa-coins" style="color: var(--payment-orange); margin-right: 5px;"></i> <strong>${p.amount.toLocaleString()}円</strong> - ${p.description || "無題"} 
+                        <span style="color: #777; font-size: 0.85em; margin-left: 8px;"><i class="fa-regular fa-calendar"></i> ${formattedDate}</span><br>
+                        <small style="color:#555;">支払者: <strong>${p.payer.name}</strong> / 対象者: [ ${participantNames} ]</small>`;
             paymentListOutput.appendChild(li);
           });
 
-          // 3. カテゴリ登録用のプルダウン
+          // 各種セレクト・チェックボックスの同期
           categorySelect.innerHTML =
             group.categories.length === 0
               ? '<option value="">-- 先にカテゴリを登録 --</option>'
@@ -527,7 +573,6 @@
             categorySelect.appendChild(opt);
           });
 
-          // 🌟 新機能3: 支払った人ドロップダウンにカテゴリを（かっこ）で併記
           payerSelect.innerHTML =
             group.members.length === 0
               ? '<option value="">-- 先にメンバーを追加 --</option>'
@@ -535,11 +580,10 @@
           group.members.forEach((m) => {
             const opt = document.createElement("option");
             opt.value = m.id;
-            opt.textContent = `${m.name} (${m.category.name})`; // カッコ書きを追加！
+            opt.textContent = `${m.name} (${m.category.name})`;
             payerSelect.appendChild(opt);
           });
 
-          // 5. 割り勘対象チェックボックス（ここにもカッコ表記を導入！）
           participantsGroup.innerHTML =
             group.members.length === 0
               ? "（メンバーを追加するとここに並びます）"
@@ -573,7 +617,7 @@
         fetchAndRefreshGroupDetails(e.target.value);
       });
 
-      // 1. グループ作成
+      // 各種作成・保存ボタンイベント（前回のロジックを引き継ぎ）
       document
         .getElementById("createGroupBtn")
         .addEventListener("click", async () => {
@@ -595,7 +639,6 @@
           }
         });
 
-      // 2. カテゴリ登録
       document
         .getElementById("createCategoryBtn")
         .addEventListener("click", async () => {
@@ -623,7 +666,6 @@
           }
         });
 
-      // 3. メンバー追加
       document
         .getElementById("createMemberBtn")
         .addEventListener("click", async () => {
@@ -649,13 +691,12 @@
           }
         });
 
-      // 4. 支払い記録の登録
       document
         .getElementById("createPaymentBtn")
         .addEventListener("click", async () => {
           if (!activeGroupId) return alert("グループを選択してください");
           const payerId = payerSelect.value;
-          const date = document.getElementById("paymentDateInput").value; // 🌟 日付の値を取得
+          const date = document.getElementById("paymentDateInput").value;
           const amount = document.getElementById("paymentAmountInput").value;
           const description = document
             .getElementById("paymentDescInput")
@@ -664,10 +705,8 @@
             'input[type="checkbox"]:checked',
           );
           const participantIds = Array.from(checkboxes).map((cb) => cb.value);
-
           if (!payerId || !amount || participantIds.length === 0)
             return alert("入力項目が不足しています");
-
           try {
             const res = await fetch(
               `${API_BASE_URL}/groups/${activeGroupId}/payments`,
@@ -680,12 +719,12 @@
                   description,
                   participantIds,
                   date,
-                }), // 🌟 bodyに date を追加！
+                }),
               },
             );
             if (res.ok) {
               alert("支払い記録を保存しました！");
-              document.getElementById("paymentDateInput").value = ""; // 🌟 入力欄をクリア
+              document.getElementById("paymentDateInput").value = "";
               document.getElementById("paymentAmountInput").value = "";
               document.getElementById("paymentDescInput").value = "";
               await fetchAndRefreshGroupDetails(activeGroupId);
@@ -695,7 +734,6 @@
           }
         });
 
-      // 5. 清算結果の取得
       document
         .getElementById("settleBtn")
         .addEventListener("click", async () => {
@@ -714,7 +752,7 @@
               }
               let html = '<ul class="settlement-list">';
               data.forEach((s) => {
-                html += `<li class="settlement-item">💰 ${s.from.name} ➡ ${s.to.name} へ 【${s.amount.toLocaleString()} 円】 支払う</li>`;
+                html += `<li class="settlement-item"><i class="fa-solid fa-arrow-right-arrow-left" style="color: var(--settle-green);"></i><span><strong>${s.from.name}</strong> さん ➡ <strong>${s.to.name}</strong> さんへ <strong>【${s.amount.toLocaleString()} 円】</strong> 支払う</span></li>`;
               });
               html += "</ul>";
               settlementResultArea.innerHTML = html;
