@@ -66,7 +66,7 @@
         margin-bottom: 8px;
       }
 
-      /* 🌟 画面分岐用のタブスタイル */
+      /* 画面分岐用のタブスタイル */
       .tab-menu {
         display: flex;
         gap: 10px;
@@ -92,7 +92,6 @@
         color: white;
         box-shadow: 0 4px 10px rgba(46, 196, 182, 0.2);
       }
-      /* 初期状態では中身を非表示にする設定用クラス */
       .view-section {
         display: none;
       }
@@ -280,14 +279,6 @@
         gap: 10px;
         color: #1b4d3e;
       }
-      pre {
-        background: #1a202c;
-        color: #edf2f7;
-        padding: 15px;
-        border-radius: 8px;
-        overflow-x: auto;
-        font-size: 0.85em;
-      }
 
       @media (max-width: 768px) {
         body {
@@ -388,7 +379,7 @@
 
       <div class="card" style="border: 2.5px solid var(--settle-green)">
         <h3 style="border-left-color: var(--settle-green)">
-          <i class="fa-solid fa-handshake"></i> 清算を実行
+          <i class="fa-solid fa-handshake"></i> 最終清算スクリプトを実行
         </h3>
         <button id="settleBtn">
           <i class="fa-solid fa-calculator"></i> このグループの清算結果を計算
@@ -450,11 +441,6 @@
       </div>
     </div>
 
-    <div class="card">
-      <h3><i class="fa-solid fa-terminal"></i> 最新のAPI通信レスポンス</h3>
-      <pre id="responseOutput">ここにAPIの返却データが表示されます</pre>
-    </div>
-
     <script>
       const API_BASE_URL = "/api";
       let activeGroupId = "";
@@ -469,9 +455,8 @@
       );
       const memberListOutput = document.getElementById("memberListOutput");
       const paymentListOutput = document.getElementById("paymentListOutput");
-      const responseOutput = document.getElementById("responseOutput");
 
-      // 🌟 新機能：タブ切り替えのイベント設定
+      // タブ切り替えのイベント設定
       const btnUserView = document.getElementById("btnUserView");
       const btnAdminView = document.getElementById("btnAdminView");
       const sectionUserView = document.getElementById("sectionUserView");
@@ -490,11 +475,7 @@
         sectionUserView.classList.remove("active");
       });
 
-      const showResult = (data) => {
-        responseOutput.textContent = JSON.stringify(data, null, 2);
-      };
-
-      // 以下、API通信ロジック（前回の内容と同一）
+      // API通信ロジック
       async function loadGroupList(selectedId = null) {
         try {
           const res = await fetch(`${API_BASE_URL}/groups`);
@@ -617,7 +598,7 @@
         fetchAndRefreshGroupDetails(e.target.value);
       });
 
-      // 各種作成・保存ボタンイベント（前回のロジックを引き継ぎ）
+      // 各種作成・保存ボタンイベント
       document
         .getElementById("createGroupBtn")
         .addEventListener("click", async () => {
