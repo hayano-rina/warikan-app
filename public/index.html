@@ -5,41 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>割り勘アプリ</title>
     <style>
-      /* 全体の基本設定 */
+      /* 🎨 カラーパレット定義 */
+      :root {
+        --primary-green: #2ec4b6; /* テーマカラー：やさしいミントグリーン */
+        --primary-green-dark: #20a497; /* ボタンホバー時の濃い緑 */
+        --member-blue: #3a86c8; /* メンバーのテーマ：ブルー */
+        --payment-orange: #f77f00; /* 支払い履歴のテーマ：暖色オレンジ */
+        --settle-green: #2a9d8f; /* 清算結果のテーマ：深めのグリーン */
+        --bg-light: #f7f9f8; /* 全体の背景：ごく薄い緑がかったグレー */
+        --text-main: #2d3748; /* メインの文字色 */
+      }
+
       body {
         font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Sans-Serif;
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
         padding: 15px;
         max-width: 750px;
         margin: 0 auto;
-        background: #f4f6f8;
-        color: #333;
-        line-height: 1.5;
+        background: var(--bg-light);
+        color: var(--text-main);
+        line-height: 1.6;
+      }
+
+      /* ヘッダーデザイン */
+      header {
+        text-align: center;
+        margin-bottom: 25px;
+        padding: 10px 0;
       }
       h1 {
         font-size: 1.8em;
-        text-align: center;
-        margin-bottom: 20px;
-        color: #222;
-      }
-      h3 {
-        margin-top: 0;
-        margin-bottom: 15px;
-        font-size: 1.2em;
-        color: #444;
-        border-left: 4px solid #007bff;
-        padding-left: 10px;
+        margin: 0;
+        color: var(--primary-green-dark);
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
       }
 
-      /* カードのデザイン */
+      /* 📁 グループ選択エリア（やさしい緑ベース） */
+      .info {
+        background: #e6f7f4;
+        padding: 18px;
+        border-radius: 14px;
+        font-size: 0.95em;
+        margin-bottom: 20px;
+        border-left: 6px solid var(--primary-green);
+        box-shadow: 0 4px 12px rgba(46, 196, 182, 0.08);
+      }
+      .info label {
+        color: var(--primary-green-dark);
+        font-size: 1em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      /* 共通カードデザイン */
       .card {
-        border: 1px solid #e1e4e6;
-        padding: 20px;
-        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 22px;
+        border-radius: 14px;
         margin-bottom: 20px;
         background: #fff;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
       }
+      h3 {
+        margin-top: 0;
+        margin-bottom: 18px;
+        font-size: 1.15em;
+        color: #4a5568;
+        border-left: 4px solid var(--primary-green);
+        padding-left: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
       .form-group {
         margin-bottom: 16px;
       }
@@ -48,32 +93,37 @@
         margin-bottom: 6px;
         font-weight: bold;
         font-size: 0.85em;
-        color: #555;
+        color: #4a5568;
       }
 
-      /* 入力フォーム（スマホでタップしやすいように高さを確保） */
       input,
       select {
-        padding: 10px;
+        padding: 11px;
         width: 100%;
-        box-sizing: border-box; /* はみ出し防止 */
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        font-size: 16px; /* 🌟 iPhoneでズームされるのを防ぐサイズ */
+        box-sizing: border-box;
+        border: 1.5px solid #cbd5e0;
+        border-radius: 8px;
+        font-size: 16px;
         background-color: #fff;
+        transition: border-color 0.2s;
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary-green);
       }
 
-      /* チェックボックスのグループ */
+      /* 割り勘チェックボックス */
       .checkbox-group {
         display: flex;
         flex-direction: column;
         gap: 10px;
-        max-height: 150px;
+        max-height: 160px;
         overflow-y: auto;
-        border: 1px solid #ced4da;
+        border: 1.5px solid #cbd5e0;
         padding: 12px;
-        border-radius: 6px;
-        background: #fdfdfd;
+        border-radius: 8px;
+        background: #fafafa;
       }
       .checkbox-label {
         font-weight: normal;
@@ -87,53 +137,44 @@
         width: auto;
         height: 18px;
         width: 18px;
+        accent-color: var(--primary-green);
       }
 
-      /* ボタンのデザイン */
+      /* 統一された緑ボタン */
       button {
         padding: 12px 20px;
         cursor: pointer;
-        background: #007bff;
+        background: var(--primary-green);
         color: white;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: bold;
         font-size: 1em;
         width: 100%;
-        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition:
+          background 0.2s,
+          transform 0.1s;
       }
       button:hover {
-        background: #0056b3;
+        background: var(--primary-green-dark);
       }
+      button:active {
+        transform: scale(0.98);
+      }
+
+      /* 特別な清算実行ボタン */
       #settleBtn {
-        background: #28a745;
+        background: var(--settle-green);
       }
       #settleBtn:hover {
-        background: #218838;
+        background: #218276;
       }
 
-      /* ログの黒枠 */
-      pre {
-        background: #212529;
-        color: #f8f9fa;
-        padding: 15px;
-        border-radius: 6px;
-        overflow-x: auto;
-        font-size: 0.85em;
-      }
-
-      /* グループ選択エリア */
-      .info {
-        background: #e8f4fd;
-        padding: 15px;
-        border-radius: 12px;
-        font-size: 0.95em;
-        margin-bottom: 20px;
-        border-left: 5px solid #007bff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-      }
-
-      /* 🌟 PC用の並び替えスタイル（基本はこれ） */
+      /* 🌟 リスト表示（2カラム）の色分け工夫 */
       .flex-container {
         display: flex;
         gap: 20px;
@@ -142,11 +183,59 @@
       .flex-child {
         flex: 1;
         background: #fff;
-        border: 1px solid #e1e4e6;
-        padding: 15px;
-        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 18px;
+        border-radius: 14px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
       }
+
+      /* 👥 メンバーリスト（ブルー系に色分け） */
+      .member-header {
+        margin-top: 0;
+        border-bottom: 2.5px solid var(--member-blue);
+        padding-bottom: 8px;
+        color: var(--member-blue);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.05em;
+      }
+      .member-item-li {
+        border-left: 3px solid var(--member-blue);
+        background: #f0f7ff;
+        margin-bottom: 8px;
+        padding: 10px !important;
+        border-radius: 0 6px 6px 0;
+      }
+      .badge {
+        background: var(--member-blue);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75em;
+        margin-left: 6px;
+        font-weight: bold;
+      }
+
+      /* 🧾 支払い履歴（暖色オレンジ系に色分け） */
+      .payment-header {
+        margin-top: 0;
+        border-bottom: 2.5px solid var(--payment-orange);
+        padding-bottom: 8px;
+        color: var(--payment-orange);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.05em;
+      }
+      .payment-item-li {
+        border-left: 3px solid var(--payment-orange);
+        background: #fffaf0;
+        margin-bottom: 8px;
+        padding: 10px !important;
+        border-radius: 0 6px 6px 0;
+      }
+
       .data-list {
         list-style: none;
         padding: 0;
@@ -154,32 +243,34 @@
       }
       .data-list li {
         padding: 10px 8px;
-        border-bottom: 1px solid #eee;
         font-size: 0.9em;
       }
-      .data-list li:last-child {
-        border-bottom: none;
-      }
-      .badge {
-        background: #6c757d;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.8em;
-        margin-left: 5px;
-        font-weight: bold;
-      }
+
+      /* 清算結果（深緑系） */
       .settlement-list {
         list-style: none;
         padding: 0;
       }
       .settlement-item {
-        background: #e8f5e9;
-        border-left: 5px solid #2e7d32;
-        padding: 12px;
-        margin-bottom: 8px;
-        border-radius: 6px;
+        background: #eefcf6;
+        border-left: 5px solid var(--settle-green);
+        padding: 14px;
+        margin-bottom: 10px;
+        border-radius: 8px;
         font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #1b4d3e;
+      }
+
+      pre {
+        background: #1a202c;
+        color: #edf2f7;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.85em;
       }
 
       /* 📱 【超重要】スマートフォン（画面幅768px以下）用の設定 */
