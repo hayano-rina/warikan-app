@@ -58,7 +58,7 @@ exports.createMember = async (req, res) => {
 // 5. 「誰が」「いくら」「誰の分を」払ったかの記録を保存する
 exports.createPayment = async (req, res) => {
   try {
-    const { payerId, amount, description, participantIds } = req.body;
+    const { payerId, amount, description, participantIds, date } = req.body;
     const payment = await groupService.createPayment(
       req.params.id,
       payerId,
